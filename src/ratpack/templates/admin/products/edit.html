@@ -1,13 +1,26 @@
 <% render 'layouts/_header.html' %>
 <h4>Add New Product</h4>
 <form action="${model.submitUrl}" method="post">
-    <label for="sku" class="columns two">Sku: </label>
-    <input type="text" name="sku" id="sku" class="columns four" value=""/>
-    <span class="columns six"></span>
+    <div class="row">
+        <label for="sku" class="columns two">Sku: </label>
+        <input type="text" name="sku" id="sku" class="columns four" value="${model.product.sku}"/>
+    </div>
 
-    <label for="name" class="columns two">Name: </label>
-    <input type="text" name="name" id="name" class="columns four" value=""/>
-    <span class="columns six"></span>
+    <div class="row">
+        <label for="name" class="columns two">Name: </label>
+        <input type="text" name="name" id="name" class="columns four" value="${model.product.name}"/>
+    </div>
+
+    <div class="row">
+        <label for="description" class="columns two">Description: </label>
+        <input type="text" name="description" id="description" class="columns four" value="${model.product.description}"/>
+    </div>
+
+    <div class="row">
+        <label for="price" class="columns two">Price (Cents): </label>
+        <input type="number" name="priceInCents" id="price" class="columns four" value="${model.product.priceInCents}"/>
+    </div>
+
 
 
 </form>

@@ -2,11 +2,13 @@ package pember.ecomm.events.product
 
 import com.thirdchannel.eventsource.AbstractEvent
 import com.thirdchannel.eventsource.annotation.EventData
+import groovy.transform.CompileStatic
 import pember.ecomm.aggregates.Product
 
 /**
  * @author Steve Pember
  */
+@CompileStatic
 class NameChangedEvent extends AbstractEvent<Product> {
 
     @EventData String name = ""
@@ -18,6 +20,6 @@ class NameChangedEvent extends AbstractEvent<Product> {
 
     @Override
     void process(Product aggregate) {
-        aggregate = name
+        aggregate.name = name
     }
 }

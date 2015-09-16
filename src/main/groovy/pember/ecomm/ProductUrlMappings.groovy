@@ -28,9 +28,17 @@ class ProductUrlMappings extends GroovyChainAction {
     void execute() throws Exception {
         path (":productId") {
             UUID productId = UUID.fromString(pathTokens["productId"].toString())
+
+            Date date = new Date()
+            if (request.queryParams["dateEffective"]) {
+                date = Date.parse("yyyy-MM-dd HH:mm a z", request.queryParams["dateEffective"].toString())
+            }
+
             byMethod {
                 get {
-                    render JsonOutput.toJson(productEventSourceService.getCurrent(productId))
+                    Product product = productEventSourceService.get(productId)
+                    productEventSourceService.loadHistoryUpTo(product, date)
+                    render JsonOutput.toJson(product)
                 }
                 put {
                     parse(CreateProductCommand)

@@ -3,6 +3,9 @@ package pember.ecomm.eventsource
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import pember.db.JooqService
+import pember.ecomm.aggregates.Product
+import pember.ecomm.commands.CreateProductCommand
+import pember.ecomm.services.ProductService
 import pember.fixtures.ExampleESApplicationUnderTest
 import ratpack.http.client.RequestSpec
 import ratpack.test.ApplicationUnderTest
@@ -103,6 +106,35 @@ class ProductEventSourceServiceSpec extends Specification {
                 priceInCents == 5000
                 description == "This is correct"
             }
+
+    }
+
+    def "Requesting a product by time should make us time travel " () {
+        given:
+            UUID productId = UUID.fromString(remote.exec {
+                CreateProductCommand command = new CreateProductCommand(sku: "ABCDE01", name: "Blarg", priceInCents: 5, description: "This is wrong")
+                Product product = get(ProductService).create(command, new Date()-10)
+                //productId = product.id
+                command.name="Real Name"
+                get(ProductService).update(product.id, command, new Date()-5)
+                command.priceInCents = 2500
+                command.description = "The correct description"
+                get(ProductService).update(product.id, command)
+                product.id.toString()
+            })
+
+        when:
+            Map firstData = json.parseText(getText("api/products/${productId}?dateEffective=${(new Date()-7).format("yyyy-MM-dd%20HH:mm%20a%20z")}")) as Map
+            Map secondData = json.parseText(getText("api/products/${productId}?dateEffective=${(new Date()-1).format("yyyy-MM-dd%20HH:mm%20a%20z")}")) as Map
+            Map currentData = json.parseText(getText("api/products/${productId}")) as Map
+        then:
+            firstData.name == "Blarg"
+
+            secondData.name == "Real Name"
+            secondData.priceInCents == 5
+
+            currentData.name == "Real Name"
+            currentData.priceInCents == 2500
 
     }
 

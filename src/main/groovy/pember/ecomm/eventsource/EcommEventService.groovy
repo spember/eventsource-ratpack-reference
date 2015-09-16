@@ -25,7 +25,7 @@ import static org.jooq.impl.DSL.field
 @CompileStatic
 class EcommEventService implements EventService {
 
-    private JooqService jooq
+    @Delegate private JooqService jooq
 
     private static final Table<Record> TABLE = table('event')
     private EventRecordMapper eventRecordMapper = new EventRecordMapper()
@@ -50,7 +50,7 @@ class EcommEventService implements EventService {
 
     @Override
     List<Event> findAllEventsForAggregate(Aggregate aggregate) {
-        jooq.create().select().from(TABLE)
+        create().select().from(TABLE)
                 .where(AGGREGATE_ID.equal(aggregate.id))
                 .orderBy(DATE_EFFECTIVE.asc()).fetch()
                 .map(eventRecordMapper)
@@ -59,7 +59,7 @@ class EcommEventService implements EventService {
 
     @Override
     List<Event> findAllEventsForAggregates(List<? extends Aggregate> aggregates) {
-        jooq.create().select().from(TABLE).where(AGGREGATE_ID.in(aggregates*.id))
+        create().select().from(TABLE).where(AGGREGATE_ID.in(aggregates*.id))
             .orderBy(DATE_EFFECTIVE.asc()).fetch()
             .map(eventRecordMapper)
     }
@@ -81,7 +81,10 @@ class EcommEventService implements EventService {
 
     @Override
     List<Event> findAllEventsForAggregateUpToDateEffective(Aggregate aggregate, Date date) {
-        return null
+        create().select().from(TABLE).where(AGGREGATE_ID.equal(aggregate.id))
+        .and(DATE_EFFECTIVE.lessOrEqual(date.toTimestamp()))
+        .orderBy(DATE_EFFECTIVE.asc()).fetch()
+        .map(eventRecordMapper)
     }
 
     @Override

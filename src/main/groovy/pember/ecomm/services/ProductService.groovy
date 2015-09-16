@@ -32,13 +32,13 @@ class ProductService {
      * @param command
      * @return
      */
-    Product create(CreateProductCommand command) {
+    Product create(CreateProductCommand command, Date dateEffective = new Date()) {
 
         log.debug("Received command: ${command}")
         // check to see if sku already exists?
         Product product = new Product()
         product.applyChange(new ProductCreatedEvent(name: command.name, initialQuantity: Math.abs(random.nextInt() % 250)+1,
-                sku: command.sku, priceInCents: command.priceInCents, description: command.description))
+                sku: command.sku, priceInCents: command.priceInCents, description: command.description, dateEffective: dateEffective))
         productEventSourceService.save(product)
         product
     }
@@ -49,16 +49,16 @@ class ProductService {
      * @param command
      * @return
      */
-    Product update(UUID productId, CreateProductCommand command) {
+    Product update(UUID productId, CreateProductCommand command, Date dateEffective=new Date()) {
         log.debug("Received command ${command}")
 
         if (productEventSourceService.aggregateService.exists(productId)) {
             Product product = productEventSourceService.getCurrent(productId)
             // here we check each field on product for differences, then apply individual events for those changes.
-            if (product.description != command.description) { product.applyChange(new DescriptionChangedEvent(description: command.description))}
-            if (product.name != command.name) { product.applyChange(new NameChangedEvent(name: command.name))}
-            if (product.priceInCents != command.name) { product.applyChange(new PriceChangedEvent(priceInCents: command.priceInCents))}
-            if (product.sku != command.sku) { product.applyChange(new SkuChangedEvent(sku: command.sku))}
+            if (product.description != command.description) { product.applyChange(new DescriptionChangedEvent(description: command.description, dateEffective: dateEffective))}
+            if (product.name != command.name) { product.applyChange(new NameChangedEvent(name: command.name, dateEffective: dateEffective))}
+            if (product.priceInCents != command.name) { product.applyChange(new PriceChangedEvent(priceInCents: command.priceInCents, dateEffective: dateEffective))}
+            if (product.sku != command.sku) { product.applyChange(new SkuChangedEvent(sku: command.sku, dateEffective: dateEffective))}
             if (productEventSourceService.save(product)) {
                 product
             } else {

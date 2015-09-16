@@ -21,8 +21,9 @@ import static ratpack.groovy.Groovy.groovyTemplate
  */
 ratpack {
 
+
     bindings {
-        println "hav environment of ${System.getProperty("app.env")}"
+
         ServerConfig serverConfig = ServerConfig.builder()
                 .onError(Action.throwException()).yaml("$serverConfig.baseDir.file/config.yaml")
                 .onError(Action.noop()).yaml("$serverConfig.baseDir.file/config_${System.getProperty("app.env")}.yaml")
@@ -32,7 +33,8 @@ ratpack {
         bindInstance(DatabaseConfig, serverConfig.get("/db", DatabaseConfig))
 
         module FlywayModule
-        module TextTemplateModule, { TextTemplateModule.Config config -> config.staticallyCompile = true }
+        module TextTemplateModule, { TextTemplateModule.Config config -> config.staticallyCompile = false }
+
         module ECommerceModule
 
         bindInstance Service, new Service() {
@@ -55,6 +57,7 @@ ratpack {
         }
 
         get {
+
             render groovyTemplate("index.html", title: "Das Coffee Haus")
         }
 
