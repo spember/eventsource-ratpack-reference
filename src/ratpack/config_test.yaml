@@ -1,0 +1,10 @@
+server:
+  port: 8090
+db:
+  url: "jdbc:postgresql://localhost/es-ratpack-test"
+  username: "admin"
+
+logging:
+  level:
+    org.jooq: DEBUG
+    com.thirdchannel: DEBUG

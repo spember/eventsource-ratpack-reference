@@ -1,0 +1,1 @@
+In a full ES system, the Person aggregate would likely have many more events attached to it

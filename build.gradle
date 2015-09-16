@@ -1,0 +1,69 @@
+buildscript {
+    ext {
+        ratpackVersion = '1.0.0-rc-1'
+    }
+    repositories {
+        maven { url "http://oss.jfrog.org/artifactory/repo" }
+        jcenter()
+    }
+    dependencies {
+        classpath "io.ratpack:ratpack-gradle:$ratpackVersion"
+    }
+}
+
+// The “ratpack” plugin applies the “application” plugin, making it easy to create a standalone application.
+// See: http://gradle.org/docs/current/userguide/application_plugin.html
+apply plugin: "io.ratpack.ratpack-groovy"
+
+// The “ratpack” plugin is IDEA aware.
+// It will create a run configuration in IDEA to launch your app in your IDE, with hot reloading.
+apply plugin: "idea"
+idea {
+    project {
+        jdkName "1.8"
+        languageLevel "1.8"
+        ipr {
+            withXml { provider ->
+                def node = provider.asNode()
+                //configure git support for the project in idea
+                node.component.find { it.'@name' == 'VcsDirectoryMappings' }?.mapping[0].'@vcs' = 'Git'
+            }
+        }
+    }
+}
+
+apply plugin: "eclipse"
+
+repositories {
+    mavenLocal()
+    maven { url "https://dl.bintray.com/thirdchannel/EventSource/" }
+    jcenter()
+    maven { url "http://repo.springsource.org/repo" } // for springloaded
+}
+
+configurations.all {
+    exclude module: "groovy"
+}
+
+dependencies {
+    runtime 'org.slf4j:slf4j-simple:1.7.7'
+    runtime 'org.postgresql:postgresql:9.4-1201-jdbc41'
+    compile "io.ratpack:ratpack-rx:$ratpackVersion"
+    compile 'com.thirdchannel:eventsource:0.2.0'
+    compile 'org.flywaydb:flyway-core:3.2.1'
+    compile 'org.jooq:jooq:3.6.1'
+    compile 'org.jooq:jooq-meta:3.6.1'
+
+    testCompile "io.ratpack:ratpack-groovy-test:${ratpackVersion}"
+    testCompile "io.ratpack:ratpack-remote-test:${ratpackVersion}"
+    testCompile "org.spockframework:spock-core:0.7-groovy-2.0", {
+        exclude module: "groovy-all"
+    }
+
+    // SpringLoaded enables runtime hot reloading.
+    // It is not part of the app runtime and is not shipped in the distribution.
+    runtime "org.springsource.loaded:springloaded:1.1.5.RELEASE"
+}
+test {
+    systemProperty 'app.env', 'test'
+}
